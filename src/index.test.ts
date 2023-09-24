@@ -23,14 +23,25 @@ describe("app", () => {
     });
   });
 
-  it("should respond", async () => {
+  it("should respond to PING", async () => {
     await new Promise((resolve) => {
       client.on("data", (data) => {
         expect(data.toString()).to.equal("+PONG\r\n");
         resolve("done");
       });
 
-      client.write("PING");
+      client.write("+PING\r\n");
+    });
+  });
+
+  it.only("should respond to ECHO", async () => {
+    await new Promise((resolve) => {
+      client.on("data", (data) => {
+        expect(data.toString()).to.equal("+hey\r\n");
+        resolve("done");
+      });
+
+      client.write("*2\r\n$4\r\nECHO\r\n$3\r\nhey\r\n");
     });
   });
 });
