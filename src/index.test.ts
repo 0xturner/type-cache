@@ -1,10 +1,18 @@
 import net, { Socket } from "net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  beforeEach,
+  afterEach,
+} from "vitest";
 
-describe("app", () => {
+describe.sequential("app", () => {
   let client: Socket;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     await new Promise((resolve) => {
       const connection = net.createConnection({ port: 8080 }, () => {
         console.log("connected to server");
@@ -14,16 +22,17 @@ describe("app", () => {
     });
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await new Promise((resolve) => {
       client.end(() => {
         console.log("disconnected from server");
         resolve("disconnected");
       });
     });
+    client = undefined as unknown as Socket;
   });
 
-  it("should respond to PING", async () => {
+  it("should respond to string PING", async () => {
     await new Promise((resolve) => {
       client.on("data", (data) => {
         expect(data.toString()).to.equal("+PONG\r\n");
@@ -34,7 +43,18 @@ describe("app", () => {
     });
   });
 
-  it.only("should respond to ECHO", async () => {
+  it("should respond to array PING", async () => {
+    await new Promise((resolve) => {
+      client.on("data", (data) => {
+        expect(data.toString()).to.equal("+PONG\r\n");
+        resolve("done");
+      });
+
+      client.write("*1\r\n$4\r\nping\r\n");
+    });
+  });
+
+  it("should respond to ECHO", async () => {
     await new Promise((resolve) => {
       client.on("data", (data) => {
         expect(data.toString()).to.equal("+hey\r\n");

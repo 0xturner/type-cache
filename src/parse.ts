@@ -25,8 +25,13 @@ export function parseType(string: string | undefined): RESPType {
 }
 
 export function parseCommand(string: string | undefined): RESPCommand {
-  if (!(string === "PING" || string === "ECHO")) {
-    throw new Error(`Invalid messagecommand: ${string}`);
+  if (string === undefined) {
+    throw new Error(`Invalid message command`);
   }
-  return string;
+
+  const normalized = string.toUpperCase();
+  if (!(normalized === "PING" || normalized === "ECHO")) {
+    throw new Error(`Invalid message command: ${string}`);
+  }
+  return normalized;
 }

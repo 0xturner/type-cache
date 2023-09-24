@@ -26,22 +26,17 @@ const server = net.createServer((socket) => {
         socket.write(encodeSimpleString("PONG"));
       }
     } else if (type === "ARRAY") {
-      console.log("type: ", type);
       const command = parseCommand(split[2]);
-      console.log("command: ", command);
 
-      if (command === "ECHO") {
+      if (command === "PING") {
+        socket.write(encodeSimpleString("PONG"));
+      } else if (command === "ECHO") {
         const string = split[4];
         if (typeof string !== "string") {
           throw new Error("Nothing to echo");
         }
-
         socket.write(encodeSimpleString(string));
       }
-    }
-
-    if (string === "PING") {
-      socket.write("+PONG\r\n");
     }
   });
 
