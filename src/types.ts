@@ -5,4 +5,4 @@ export type RESPType =
   | "INTEGER"
   | "BULK_STRING"
   | "ARRAY";
-export type RESPCommand = "PING" | "ECHO";
+export type RESPCommand = "PING" | "ECHO" | "SET" | "GET";

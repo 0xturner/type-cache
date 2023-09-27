@@ -30,7 +30,14 @@ export function parseCommand(string: string | undefined): RESPCommand {
   }
 
   const normalized = string.toUpperCase();
-  if (!(normalized === "PING" || normalized === "ECHO")) {
+  if (
+    !(
+      normalized === "PING" ||
+      normalized === "ECHO" ||
+      normalized === "SET" ||
+      normalized === "GET"
+    )
+  ) {
     throw new Error(`Invalid message command: ${string}`);
   }
   return normalized;

@@ -64,4 +64,15 @@ describe.sequential("app", () => {
       client.write("*2\r\n$4\r\nECHO\r\n$3\r\nhey\r\n");
     });
   });
+
+  it.only("should process SET", async () => {
+    await new Promise((resolve) => {
+      client.on("data", (data) => {
+        expect(data.toString()).to.equal("+OK\r\n");
+        resolve("done");
+      });
+
+      client.write("*3\r\n$3\r\nset\r\n$5\r\npears\r\n$5\r\npears\r\n");
+    });
+  });
 });
