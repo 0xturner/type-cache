@@ -1,2 +1,3 @@
 # memory-db
-An in memory db implemented in Typescript
+
+An experimental in memory key value store implemented in Typescript

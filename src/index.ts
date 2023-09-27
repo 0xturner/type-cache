@@ -5,7 +5,7 @@ import { RESPCommand } from "./types";
 
 const PORT = 8080;
 
-const db = new Map();
+const db = new Map<string, string>();
 
 const server = net.createServer((socket) => {
   console.log("client connected");
@@ -44,38 +44,52 @@ server.listen(PORT, () => {
 });
 
 const simpleStringHandlers: Record<RESPCommand, () => string> = {
-  PING: () => {
+  PING: (): string => {
     return "PONG";
   },
-  ECHO: () => {
+  ECHO: (): string => {
     throw new Error("not supported");
   },
-  SET: () => {
+  SET: (): string => {
     throw new Error("not supported");
   },
-  GET: () => {
+  GET: (): string => {
     throw new Error("not supported");
   },
 };
 
 const arrayMessageHandlers: Record<RESPCommand, (split: string[]) => string> = {
-  PING: () => {
+  PING: (): string => {
     return "PONG";
   },
-  ECHO: (split) => {
+  ECHO: (split): string => {
     const string = split[4];
     if (typeof string !== "string") {
       throw new Error("Nothing to echo");
     }
+
     return string;
   },
-  SET: (split) => {
+  SET: (split): string => {
     const key = split[4];
     const value = split[6];
+    if (typeof key !== "string" || typeof value !== "string") {
+      throw new Error("Missing key or value");
+    }
     db.set(key, value);
+
     return "OK";
   },
-  GET: (split) => {
-    return "not implemented";
+  GET: (split): string => {
+    const key = split[4];
+    if (typeof key !== "string") {
+      throw new Error("Missing key");
+    }
+    const value = db.get(key);
+    if (typeof value !== "string") {
+      throw new Error("No value found");
+    }
+
+    return value;
   },
 };

@@ -65,14 +65,24 @@ describe.sequential("app", () => {
     });
   });
 
-  it.only("should process SET", async () => {
-    await new Promise((resolve) => {
+  it.only("should process SET and GET", async () => {
+    let responseCount = 0;
+    const key = "foo";
+    const value = "bar";
+
+    await new Promise(async (resolve) => {
       client.on("data", (data) => {
-        expect(data.toString()).to.equal("+OK\r\n");
-        resolve("done");
+        if (responseCount === 0) {
+          expect(data.toString()).to.equal("+OK\r\n");
+          responseCount++;
+        } else if (responseCount === 1) {
+          expect(data.toString()).to.equal(`+${value}\r\n`);
+          resolve("done");
+        }
       });
 
-      client.write("*3\r\n$3\r\nset\r\n$5\r\npears\r\n$5\r\npears\r\n");
+      client.write(`*3\r\n$3\r\nset\r\n$5\r\n${key}\r\n$5\r\n${value}\r\n`); // SET
+      client.write(`*2\r\n$3\r\nget\r\n$5\r\n${key}\r\n`); // GET
     });
   });
 });
