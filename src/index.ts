@@ -1,11 +1,11 @@
-import net, { Socket } from "net";
-import { parseType, parseCommand } from "./parse";
+import net from "net";
+import { parseType, parseCommand, parseExpiry } from "./parse";
 import { encodeSimpleString } from "./encode";
 import { RESPCommand } from "./types";
 
-const PORT = 8080;
+const PORT = 6379;
 
-const db = new Map<string, string>();
+const store = new Map<string, { value: string; expiry: number | null }>();
 
 const server = net.createServer((socket) => {
   console.log("client connected");
@@ -30,7 +30,9 @@ const server = net.createServer((socket) => {
     } else if (type === "ARRAY") {
       const command = parseCommand(split[2]);
       const result = arrayMessageHandlers[command](split);
-      socket.write(encodeSimpleString(result));
+      const encoded =
+        result === null ? NULL_BULK_STRING : encodeSimpleString(result);
+      socket.write(encoded);
     }
   });
 
@@ -58,7 +60,10 @@ const simpleStringHandlers: Record<RESPCommand, () => string> = {
   },
 };
 
-const arrayMessageHandlers: Record<RESPCommand, (split: string[]) => string> = {
+const arrayMessageHandlers: Record<
+  RESPCommand,
+  (split: string[]) => string | null
+> = {
   PING: (): string => {
     return "PONG";
   },
@@ -73,23 +78,49 @@ const arrayMessageHandlers: Record<RESPCommand, (split: string[]) => string> = {
   SET: (split): string => {
     const key = split[4];
     const value = split[6];
+
     if (typeof key !== "string" || typeof value !== "string") {
       throw new Error("Missing key or value");
     }
-    db.set(key, value);
+
+    const expiry = parseExpiry(split);
+
+    store.set(key, {
+      value,
+      expiry: expiry ? getExpiry(expiry) : null,
+    });
 
     return "OK";
   },
-  GET: (split): string => {
+  GET: (split): string | null => {
     const key = split[4];
     if (typeof key !== "string") {
       throw new Error("Missing key");
     }
-    const value = db.get(key);
-    if (typeof value !== "string") {
+    const record = store.get(key);
+    if (!record) {
       throw new Error("No value found");
+    }
+
+    const { value, expiry } = record;
+
+    if (expiry && isExpired(expiry)) {
+      store.delete(key);
+      return null;
     }
 
     return value;
   },
 };
+
+function getExpiry(ms: number) {
+  const now = new Date().getTime();
+  return now + Number(ms);
+}
+
+function isExpired(expiry: number) {
+  const now = new Date().getTime();
+  return now > expiry;
+}
+
+const NULL_BULK_STRING = "$-1\r\n";

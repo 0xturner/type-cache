@@ -42,3 +42,14 @@ export function parseCommand(string: string | undefined): RESPCommand {
   }
   return normalized;
 }
+
+export function parseExpiry(split: string[]): number | null {
+  const arg = split[8];
+  const ms = split[10];
+
+  if (arg === "px" && ms && !isNaN(parseInt(ms))) {
+    return parseInt(ms);
+  }
+
+  return null;
+}
