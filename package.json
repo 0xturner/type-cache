@@ -1,7 +1,7 @@
 {
-  "name": "memory-db-ts",
+  "name": "type-cache",
   "version": "1.0.0",
-  "description": "An in memory db implemented in Typescript",
+  "description": "An in memory key value store implemented in Typescript",
   "main": "index.js",
   "scripts": {
     "start:dev": "npx nodemon",
@@ -9,15 +9,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/0xturner/memory-db.git"
+    "url": "git+https://github.com/0xturner/type-cache.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/0xturner/memory-db/issues"
+    "url": "https://github.com/0xturner/type-cache/issues"
   },
-  "homepage": "https://github.com/0xturner/memory-db#readme",
+  "homepage": "https://github.com/0xturner/type-cache#readme",
   "devDependencies": {
     "@types/node": "^20.6.3",
     "nodemon": "^3.0.1",
